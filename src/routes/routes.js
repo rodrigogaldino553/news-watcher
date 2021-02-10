@@ -22,11 +22,8 @@ const routes = (app) => {
 
       try {
         const interaction = await database.createNews(data)
-        const newsID = interaction[1]
 
-        console.log('routes line 28' + newsID)
-
-        await database.createCategory(data.category, newsID)
+        //await database.createCategory(data.category, newsID)
 
         return response.status(200).send('news saved on database!')
       } catch (error) {
@@ -41,8 +38,8 @@ const routes = (app) => {
       try {
         //fazer o join das tabelas aqui
         const news = await database.selectAll()
-        console.log(news)
-        return response.statues(200).send(news)
+       
+        return response.status(200).send(news)
 
       } catch (error) {
         console.log(error)
@@ -53,15 +50,23 @@ const routes = (app) => {
   app.route("/get-news")
     .post(async (request, response) => {
       const data = request.body
-      if(!data.title || !data.category) return response.status(403).send('bad request')
+      if(!data.title && !data.category) return response.status(403).send('bad request')
+      
+      try {
+        const news = await database.selectNews(data)
 
+        return response.status(200).send(news)
+      } catch (error) {
+        console.log(error)
+        return response.status(500).send({message: "can't get news"})
+      }
     })
 
   app.route("/get-all-categories")
     .get(async (request, response) => {
       try {
         const categories = await database.selectAllCategories()
-        return response.statues(200).send(categories)
+        return response.status(200).send(categories)
       } catch (error) {
         console.log(error)
         return response.status(503).send('Was not possible take data')
